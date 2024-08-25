@@ -128,18 +128,18 @@ const port = 3000;
 app.use(bodyParser.json());
 
 // Create a new artist with profile information
-app.post('/artists', async (req, res) => {
-  const { name, username, description, profilePicture, walletAddress, instagram, tiktok, twitter, website } = req.body;
-  try {
-    const result = await pool.query(
-      'INSERT INTO artists (name, username, description, profilePicture, walletAddress, instagram, tiktok, twitter, website, createdAt) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW()) RETURNING *',
-      [name, username, description, profilePicture, walletAddress, instagram, tiktok, twitter, website]
-    );
-    res.status(201).json(result.rows[0]);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+  app.post('/artists', async (req, res) => {
+    const { name, username, description, profilePicture, walletAddress, instagram, tiktok, twitter, website } = req.body;
+    try {
+      const result = await pool.query(
+        'INSERT INTO artists (name, username, description, profilePicture, walletAddress, instagram, tiktok, twitter, website, createdAt) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW()) RETURNING *',
+        [name, username, description, profilePicture, walletAddress, instagram, tiktok, twitter, website]
+      );
+      res.status(201).json(result.rows[0]);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
 
 // Get all artists
 app.get('/artists', async (req, res) => {
@@ -197,17 +197,22 @@ app.delete('/artists/:id', async (req, res) => {
 // Add an item to featured content for an artist
 app.post('/artists/:artistId/featured-content', async (req, res) => {
   const { artistId } = req.params;
-  const { image, name } = req.body;
+  const { type, creator, file_name, file, price, scarcity, utility, tags, geo } = req.body;
+
   try {
     const result = await pool.query(
-      'INSERT INTO featured_content (artistId, image, name, createdAt) VALUES ($1, $2, $3, NOW()) RETURNING *',
-      [artistId, image, name]
+      `INSERT INTO featured_content (type, creator, file_name, file, price, scarcity, utility, tags, geo, createdat, artistid) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), $10) 
+       RETURNING *`,
+      [type, creator, file_name, file, price, scarcity, utility, tags, geo, artistId]
     );
+    
     res.status(201).json(result.rows[0]);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
 
 // Get all featured content for an artist
 app.get('/artists/:artistId/featured-content', async (req, res) => {
