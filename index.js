@@ -9,7 +9,7 @@ const cors = require('cors'); // Import the cors middleware
 const app = express();
 const port = 3000;
 
-const allowedOrigins = ['http://localhost', 'https://mashdevpreview.netlify.app'];
+const allowedOrigins = ['http://localhost', 'https://mashdevpreview.netlify.app','http://localhost:5173/'];
 
 
 app.use(cors({
