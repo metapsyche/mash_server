@@ -8,19 +8,19 @@ const pool = require('./db'); // Make sure the path to db.js is correct
 const app = express();
 const port = 3000;
 
-const allowedOrigins = ['http://localhost', 'https://mashdevpreview.netlify.app'];
+// const allowedOrigins = ['http://localhost', 'https://mashdevpreview.netlify.app'];
 
 
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true, // Allow cookies if needed
-}));
+// app.use(cors({
+//   origin: (origin, callback) => {
+//     if (!origin || allowedOrigins.includes(origin)) {
+//       callback(null, true);
+//     } else {
+//       callback(new Error('Not allowed by CORS'));
+//     }
+//   },
+//   credentials: true, // Allow cookies if needed
+// }));
 
 
 app.use(bodyParser.json());
