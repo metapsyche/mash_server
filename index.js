@@ -9,7 +9,7 @@ const cors = require('cors'); // Import the cors middleware
 const app = express();
 const port = 3000;
 
-const allowedOrigins = ['http://localhost', 'https://mashdevpreview.netlify.app','http://localhost:5173/'];
+const allowedOrigins = ['http://localhost', 'https://mashdevpreview.netlify.app', 'http://localhost:5173'];
 
 
 app.use(cors({
@@ -20,11 +20,20 @@ app.use(cors({
       callback(new Error('Not allowed by CORS'));
     }
   },
-  credentials: true, // Allow cookies if needed
+  credentials: true, // Allow cookies if needed 
 }));
 
 
 app.use(bodyParser.json());
+
+
+// const pool = require('./db'); // Ensure the correct path
+
+pool.on('error', (err) => {
+  console.error('Unexpected error on idle client', err);
+  process.exit(-1);
+});
+
 
 // Create a new artist with profile information
   app.post('/artists', async (req, res) => {
