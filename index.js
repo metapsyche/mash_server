@@ -9,19 +9,19 @@ const cors = require('cors'); // Import the cors middleware
 const app = express();
 const port = 3000;
 
-const allowedOrigins = ['http://localhost', 'https://mashdevpreview.netlify.app', 'http://localhost:5173'];
+// const allowedOrigins = ['http://localhost', 'https://mashdevpreview.netlify.app', 'http://localhost:5173'];
 
 
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true, // Allow cookies if needed 
-}));
+// app.use(cors({
+//   origin: (origin, callback) => {
+//     if (!origin || allowedOrigins.includes(origin)) {
+//       callback(null, true);
+//     } else {
+//       callback(new Error('Not allowed by CORS'));
+//     }
+//   },
+//   credentials: true, // Allow cookies if needed 
+// }));
 
 
 app.use(bodyParser.json());
