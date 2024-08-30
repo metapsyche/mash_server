@@ -36,18 +36,22 @@ pool.on('error', (err) => {
 
 
 // Create a new artist with profile information
-  app.post('/artists', async (req, res) => {
-    const { name, username, description, profilePicture, walletAddress, instagram, tiktok, twitter, website } = req.body;
-    try {
-      const result = await pool.query(
-        'INSERT INTO artists (name, username, description, profilePicture, walletAddress, instagram, tiktok, twitter, website, createdAt) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW()) RETURNING *',
-        [name, username, description, profilePicture, walletAddress, instagram, tiktok, twitter, website]
-      );
-      res.status(201).json(result.rows[0]);
-    } catch (err) {
-      res.status(500).json({ error: err.message });
-    }
-  });
+// server.js (or wherever your routes are defined)
+// POST endpoint to add an artist
+app.post('/artists', async (req, res) => {
+  const { name, description, profilePicture, walletAddress } = req.body;
+  try {
+    const result = await pool.query(
+      'INSERT INTO artists (name, description, profilePicture, walletAddress, createdAt) VALUES ($1, $2, $3, $4, NOW()) RETURNING *',
+      [name, description, profilePicture, walletAddress]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 
 // Get all artists
 app.get('/artists', async (req, res) => {
@@ -123,6 +127,17 @@ app.post('/artists/:artistId/featured-content', async (req, res) => {
 
 
 // Get all featured content for an artist
+app.get('/artists/:artistId/featured-content', async (req, res) => {
+  const { artistId } = req.params;
+  try {
+    const result = await pool.query('SELECT * FROM featured_content WHERE artistId = $1', [artistId]);
+    res.status(200).json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 app.get('/artists/:artistId/new-releases', async (req, res) => {
   const { artistId } = req.params;
   try {
