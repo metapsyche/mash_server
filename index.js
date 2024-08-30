@@ -25,9 +25,9 @@ const port = 3000;
 
 app.use(cors({
   origin: (origin, callback) => {
-    callback(null, true); // Allow all origins
+    callback(null, true);  
   },
-  credentials: true, // Allow cookies if needed
+  credentials: true,  
 }));
 
 
