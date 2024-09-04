@@ -42,24 +42,19 @@ pool.on('error', (err) => {
   process.exit(-1);
 });
 
-
 // Create a new artist with profile information
-// server.js (or wherever your routes are defined)
-// POST endpoint to add an artist
 app.post('/artists', async (req, res) => {
-  const { name, description, profilePicture, walletAddress } = req.body;
+  const { name, type, description, profilePicture, walletAddress } = req.body;
   try {
     const result = await pool.query(
-      'INSERT INTO artists (name, description, profilePicture, walletAddress, createdAt) VALUES ($1, $2, $3, $4, NOW()) RETURNING *',
-      [name, description, profilePicture, walletAddress]
+      'INSERT INTO artists (name, type, description, profilePicture, walletAddress, createdAt) VALUES ($1, $2, $3, $4, $5, NOW()) RETURNING *',
+      [name, type, description, profilePicture, walletAddress]
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
-
-
 
 // Get all artists
 app.get('/artists', async (req, res) => {
@@ -71,7 +66,7 @@ app.get('/artists', async (req, res) => {
   }
 });
 
-
+// Get a specific artist by ID
 app.get('/artists/:id', async (req, res) => {
   const { id } = req.params;
   try {
@@ -85,16 +80,18 @@ app.get('/artists/:id', async (req, res) => {
   }
 });
 
-
 // Update an artist by ID
 app.put('/artists/:id', async (req, res) => {
   const { id } = req.params;
-  const { name, username, description, profilePicture, walletAddress, instagram, tiktok, twitter, website } = req.body;
+  const { name, type, description, profilePicture, walletAddress } = req.body;
   try {
     const result = await pool.query(
-      'UPDATE artists SET name = $1, username = $2, description = $3, profilePicture = $4, walletAddress = $5, instagram = $6, tiktok = $7, twitter = $8, website = $9 WHERE id = $10 RETURNING *',
-      [name, username, description, profilePicture, walletAddress, instagram, tiktok, twitter, website, id]
+      'UPDATE artists SET name = $1, type = $2, description = $3, profilePicture = $4, walletAddress = $5 WHERE id = $6 RETURNING *',
+      [name, type, description, profilePicture, walletAddress, id]
     );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Artist not found' });
+    }
     res.status(200).json(result.rows[0]);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -105,100 +102,210 @@ app.put('/artists/:id', async (req, res) => {
 app.delete('/artists/:id', async (req, res) => {
   const { id } = req.params;
   try {
-    await pool.query('DELETE FROM artists WHERE id = $1', [id]);
+    const result = await pool.query('DELETE FROM artists WHERE id = $1 RETURNING *', [id]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Artist not found' });
+    }
+    res.status(204).send();
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+// Routes for Featured Content
+
+
+// Create a new solo work for a specific artist
+app.post('/artists/:artistId/solo-works', async (req, res) => {
+  const { artistId } = req.params;
+  const { type, title, file_name, song_url, price, scarcity, utility, tags, geo, image_url } = req.body;
+
+  try {
+    const result = await pool.query(
+      `INSERT INTO solo_works (artist_id, type, title, file_name, song_url, price, scarcity, utility, tags, geo, image_url, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW())
+       RETURNING *`,
+      [artistId, type, title, file_name, song_url, price, scarcity, utility, tags, geo, image_url]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get all solo works for a specific artist
+app.get('/artists/:artistId/solo-works', async (req, res) => {
+  const { artistId } = req.params;
+
+  try {
+    const result = await pool.query('SELECT * FROM solo_works WHERE artist_id = $1', [artistId]);
+    res.status(200).json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get a specific solo work by ID for a specific artist
+app.get('/artists/:artistId/solo-works/:soloWorkId', async (req, res) => {
+  const { artistId, soloWorkId } = req.params;
+
+  try {
+    const result = await pool.query('SELECT * FROM solo_works WHERE artist_id = $1 AND id = $2', [artistId, soloWorkId]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Solo work not found' });
+    }
+    res.status(200).json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Update a specific solo work by ID for a specific artist
+app.put('/artists/:artistId/solo-works/:soloWorkId', async (req, res) => {
+  const { artistId, soloWorkId } = req.params;
+  const { type, title, file_name, song_url, price, scarcity, utility, tags, geo, image_url } = req.body;
+
+  try {
+    const result = await pool.query(
+      `UPDATE solo_works 
+       SET type = $1, title = $2, file_name = $3, song_url = $4, price = $5, scarcity = $6, utility = $7, tags = $8, geo = $9, image_url = $10 
+       WHERE artist_id = $11 AND id = $12 
+       RETURNING *`,
+      [type, title, file_name, song_url, price, scarcity, utility, tags, geo, image_url, artistId, soloWorkId]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Solo work not found' });
+    }
+    res.status(200).json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Delete a specific solo work by ID for a specific artist
+app.delete('/artists/:artistId/solo-works/:soloWorkId', async (req, res) => {
+  const { artistId, soloWorkId } = req.params;
+
+  try {
+    const result = await pool.query('DELETE FROM solo_works WHERE artist_id = $1 AND id = $2 RETURNING *', [artistId, soloWorkId]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Solo work not found' });
+    }
     res.status(204).send();
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // Routes for Featured Content
 
-// Add an item to featured content for an artist
-app.post('/artists/:artistId/featured-content', async (req, res) => {
-  const { artistId } = req.params;
-  const { type, creator, file_name, file, price, scarcity, utility, tags, geo } = req.body;
 
-  try {
-    const result = await pool.query(
-      `INSERT INTO featured_content (type, creator, file_name, file, price, scarcity, utility, tags, geo, createdat, artistid) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), $10) 
-       RETURNING *`,
-      [type, creator, file_name, file, price, scarcity, utility, tags, geo, artistId]
-    );
+
+// app.post('/artists/:artistId/featured-content', async (req, res) => {
+//   const { artistId } = req.params;
+//   const { type, creator, file_name, file, price, scarcity, utility, tags, geo } = req.body;
+
+//   try {
+//     const result = await pool.query(
+//       `INSERT INTO featured_content (type, creator, file_name, file, price, scarcity, utility, tags, geo, createdat, artistid) 
+//        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), $10) 
+//        RETURNING *`,
+//       [type, creator, file_name, file, price, scarcity, utility, tags, geo, artistId]
+//     );
     
-    res.status(201).json(result.rows[0]);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+//     res.status(201).json(result.rows[0]);
+//   } catch (err) {
+//     res.status(500).json({ error: err.message });
+//   }
+// });
 
 
-// Get all featured content for an artist
-app.get('/artists/:artistId/featured-content', async (req, res) => {
-  const { artistId } = req.params;
-  try {
-    const result = await pool.query('SELECT * FROM featured_content WHERE artistId = $1', [artistId]);
-    res.status(200).json(result.rows);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+// // Get all featured content for an artist
+// app.get('/artists/:artistId/featured-content', async (req, res) => {
+//   const { artistId } = req.params;
+//   try {
+//     const result = await pool.query('SELECT * FROM featured_content WHERE artistId = $1', [artistId]);
+//     res.status(200).json(result.rows);
+//   } catch (err) {
+//     res.status(500).json({ error: err.message });
+//   }
+// });
 
 
-app.get('/artists/:artistId/new-releases', async (req, res) => {
-  const { artistId } = req.params;
-  try {
-    const result = await pool.query('SELECT * FROM new_releases WHERE artistId = $1', [artistId]);
-    res.status(200).json(result.rows);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+// app.get('/artists/:artistId/new-releases', async (req, res) => {
+//   const { artistId } = req.params;
+//   try {
+//     const result = await pool.query('SELECT * FROM new_releases WHERE artistId = $1', [artistId]);
+//     res.status(200).json(result.rows);
+//   } catch (err) {
+//     res.status(500).json({ error: err.message });
+//   }
+// });
 
 
-// Routes for New Releases
+// // Routes for New Releases
 
-// Add an item to new releases for an artist
-app.post('/artists/:artistId/new-releases', async (req, res) => {
-  const { artistId } = req.params;
-  const {
-    type,
-    creator,
-    file_name,
-    song_url,
-    price,
-    scarcity,
-    utility,
-    tags,
-    geo,
-    image_url,
-  } = req.body;
+// // Add an item to new releases for an artist
+// app.post('/artists/:artistId/new-releases', async (req, res) => {
+//   const { artistId } = req.params;
+//   const {
+//     type,
+//     creator,
+//     file_name,
+//     song_url,
+//     price,
+//     scarcity,
+//     utility,
+//     tags,
+//     geo,
+//     image_url,
+//   } = req.body;
 
-  try {
-    const result = await pool.query(
-      `INSERT INTO new_releases (type, creator, file_name, song_url, price, scarcity, utility, tags, geo, image_url, artistid, created_at) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW()) RETURNING *`,
-      [type, creator, file_name, song_url, price, scarcity, utility, tags, geo, image_url, artistId]
-    );
-    res.status(201).json(result.rows[0]);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+//   try {
+//     const result = await pool.query(
+//       `INSERT INTO new_releases (type, creator, file_name, song_url, price, scarcity, utility, tags, geo, image_url, artistid, created_at) 
+//        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW()) RETURNING *`,
+//       [type, creator, file_name, song_url, price, scarcity, utility, tags, geo, image_url, artistId]
+//     );
+//     res.status(201).json(result.rows[0]);
+//   } catch (err) {
+//     res.status(500).json({ error: err.message });
+//   }
+// });
 
 
 
-// Get all new releases for an artist
-app.get('/artists/:artistId/new-releases', async (req, res) => {
-  const { artistId } = req.params;
-  try {
-    const result = await pool.query('SELECT * FROM new_releases WHERE artistId = $1', [artistId]);
-    res.status(200).json(result.rows);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+// // Get all new releases for an artist
+// app.get('/artists/:artistId/new-releases', async (req, res) => {
+//   const { artistId } = req.params;
+//   try {
+//     const result = await pool.query('SELECT * FROM new_releases WHERE artistId = $1', [artistId]);
+//     res.status(200).json(result.rows);
+//   } catch (err) {
+//     res.status(500).json({ error: err.message });
+//   }
+// });
+
+
+
+
+
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
