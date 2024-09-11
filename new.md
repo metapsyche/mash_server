@@ -177,3 +177,27 @@ Here are JSON samples for testing the various API routes related to solo works:
 ```
 
 You can use these JSON samples to test the various API endpoints. They cover creating, retrieving, updating, and deleting solo works for specific artists.
+
+
+
+
+
+
+
+
+
+
+
+
+{
+  "type": "Song",
+  "title": "THISMINORITY",
+  "file_name": "Biohazard",
+  "image_url": "https://firebasestorage.googleapis.com/v0/b/mash-8645e.appspot.com/o/Mike%20Bellamy%20Music%2F1.Biohazard.jpg?alt=media&token=cc8c6cfd-fc98-40ae-b809-afba8e72ba65",
+  "price": 0.02,
+  "song_url":"https://firebasestorage.googleapis.com/v0/b/mash-8645e.appspot.com/o/Mike%20Bellamy%20Music%2FBiohazard.mp3?alt=media&token=28e39d17-3c51-473c-8b1d-b2b8639d590e",
+  "scarcity": "/ 100",
+  "utility": "20% off live shows",
+  "tags": ["skull", "gold"],
+  "geo": "NYC"
+}

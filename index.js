@@ -197,6 +197,40 @@ app.delete('/artists/:artistId/solo-works/:soloWorkId', async (req, res) => {
 });
 
 
+// Update a specific solo work's song_url by ID for a specific artist
+app.put('/artists/:artistId/solo-works/:soloWorkId/song-url', async (req, res) => {
+  const { artistId, soloWorkId } = req.params;
+  const { song_url } = req.body;
+
+  try {
+    // First, check if the solo work exists
+    const soloWorkResult = await pool.query('SELECT * FROM solo_works WHERE artist_id = $1 AND id = $2', [artistId, soloWorkId]);
+    if (soloWorkResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Solo work not found' });
+    }
+
+    // Check if song_url is already present
+    const existingSongUrl = soloWorkResult.rows[0].song_url;
+
+    if (existingSongUrl) {
+      // If song_url exists, update it
+      const updateResult = await pool.query(
+        'UPDATE solo_works SET song_url = $1 WHERE artist_id = $2 AND id = $3 RETURNING *',
+        [song_url, artistId, soloWorkId]
+      );
+      return res.status(200).json(updateResult.rows[0]);
+    } else {
+      // If song_url doesn't exist, add it
+      const updateResult = await pool.query(
+        'UPDATE solo_works SET song_url = $1 WHERE artist_id = $2 AND id = $3 RETURNING *',
+        [song_url, artistId, soloWorkId]
+      );
+      return res.status(200).json(updateResult.rows[0]);
+    }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 
 
