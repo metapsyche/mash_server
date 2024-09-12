@@ -111,7 +111,44 @@ app.delete('/artists/:id', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-// Routes for Featured Content
+
+
+// Update an artist's profile picture and/or banner picture by ID
+app.put('/artists/:id/pictures', async (req, res) => {
+  const { id } = req.params;
+  const { profilePicture, bannerPicture } = req.body;
+
+  try {
+    // First, check if the artist exists
+    const artistResult = await pool.query('SELECT * FROM artists WHERE id = $1', [id]);
+    if (artistResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Artist not found' });
+    }
+
+    // Update profile picture and/or banner picture
+    const result = await pool.query(
+      `UPDATE artists 
+       SET profilePicture = COALESCE($1, profilePicture), 
+           bannerPicture = COALESCE($2, bannerPicture)
+       WHERE id = $3 
+       RETURNING *`,
+      [profilePicture, bannerPicture, id]
+    );
+
+    res.status(200).json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+
+
+
+
+
+
+
 
 
 // Create a new solo work for a specific artist
