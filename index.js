@@ -11,6 +11,8 @@ const port = 3000;
 
 // const allowedOrigins = ['http://localhost', 'https://mashdevpreview.netlify.app', 'http://localhost:5173'];
 
+//server 
+
 
 // app.use(cors({
 //   origin: (origin, callback) => {
