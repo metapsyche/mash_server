@@ -44,6 +44,10 @@ pool.on('error', (err) => {
   process.exit(-1);
 });
 
+app.get('/', (req, res) => {
+  res.send('Hello Howard');
+});
+
 // Create a new artist with profile information
 app.post('/artists', async (req, res) => {
   const { name, type, description, profilePicture, walletAddress } = req.body;
