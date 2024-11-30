@@ -5,6 +5,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const pool = require('./db'); // Make sure the path to db.js is correct
 const cors = require('cors'); // Import the cors middleware
+const ffmpeg = require('fluent-ffmpeg');
 
 const app = express();
 const port = 3000;
@@ -45,8 +46,66 @@ pool.on('error', (err) => {
 });
 
 app.get('/', (req, res) => {
-  res.send('Hello Howard');
+  res.send('Hello mash backend');
 });
+
+
+app.post('/mash-video-audio', async (req, res) => {
+  const { videoUrl, audioUrl } = req.body;
+
+  if (!videoUrl || !audioUrl) {
+    return res.status(400).json({ error: 'Both videoUrl and audioUrl are required' });
+  }
+
+  const videoPath = `temp/${Date.now()}_video.mp4`;
+  const audioPath = `temp/${Date.now()}_audio.mp3`;
+  const outputPath = `outputs/${Date.now()}_merged.mp4`;
+
+  try {
+    // Ensure directories exist
+    if (!fs.existsSync('temp')) {
+      fs.mkdirSync('temp');
+    }
+    if (!fs.existsSync('outputs')) {
+      fs.mkdirSync('outputs');
+    }
+
+    // Download the video and audio files
+    await downloadFile(videoUrl, videoPath);
+    await downloadFile(audioUrl, audioPath);
+
+    // Merge video and audio using FFmpeg
+    ffmpeg()
+      .input(videoPath)
+      .input(audioPath)
+      .output(outputPath)
+      .on('end', () => {
+        // Cleanup temporary files
+        fs.unlinkSync(videoPath);
+        fs.unlinkSync(audioPath);
+
+        // Send the resulting file to the client
+        res.download(outputPath, 'merged-video.mp4', (err) => {
+          if (err) {
+            console.error(err);
+            res.status(500).json({ error: 'File download failed' });
+          }
+
+          // Cleanup the output file after download
+          fs.unlinkSync(outputPath);
+        });
+      })
+      .on('error', (err) => {
+        console.error('Error merging video and audio:', err);
+        res.status(500).json({ error: 'Failed to merge video and audio' });
+      })
+      .run();
+  } catch (err) {
+    console.error('Error processing request:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 // Create a new artist with profile information
 app.post('/artists', async (req, res) => {
