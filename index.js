@@ -52,6 +52,34 @@ const mergeVideoAndAudio = async (videoPath, audioPath, outputPath) => {
         console.error('Error during merge:', error);
     }
 };
+const mergePictureAndAudio = async (imagePath, audioPath, outputPath) => {
+    try {
+        // Create a 30-second static video from the image
+        await new Promise((resolve, reject) => {
+            ffmpeg()
+                .input(imagePath)
+                .inputOptions('-loop 1') // Loop the input image
+                .input(audioPath)
+                .audioCodec('aac') // Encode audio to AAC format
+                .outputOptions('-c:v libx264') // Video codec
+                .outputOptions('-preset medium') // Encoding preset
+                .outputOptions('-tune stillimage') // Optimize for still image
+                .outputOptions('-crf 23') // Constant Rate Factor for quality
+                .outputOptions('-shortest') // Ensure output matches the shortest stream
+                .outputOptions('-t 30') // Force 30-second duration
+                .outputOptions('-map 0:v') // Map video stream from image
+                .outputOptions('-map 1:a') // Map audio stream
+                .on('end', resolve)
+                .on('error', reject)
+                .save(outputPath);
+        });
+
+        console.log(`Merge complete: ${outputPath}`);
+    } catch (error) {
+        console.error('Error during merge:', error);
+        throw error;
+    }
+};
 
 const app = express();
 const port = 3000;
@@ -96,6 +124,75 @@ app.get('/', (req, res) => {
 });
 
 
+app.post('/merge-picture-audio', async (req, res) => {
+    const { imageUrl, audioUrl } = req.body;
+
+    if (!imageUrl || !audioUrl) {
+        return res.status(400).json({ error: 'Both image and audio URLs are required' });
+    }
+
+    const outputFileName = `${Date.now()}_picture_audio_output.mp4`;
+    const outputPath = path.join('outputs', outputFileName);
+
+    try {
+        // Ensure output directory exists
+        await fsPromises.mkdir('outputs', { recursive: true });
+
+        // Download image and audio files
+        const imageDownloadPath = path.join('downloads', `${Date.now()}_image${path.extname(imageUrl)}`);
+        const audioDownloadPath = path.join('downloads', `${Date.now()}_audio${path.extname(audioUrl)}`);
+
+        // Ensure downloads directory exists
+        await fsPromises.mkdir('downloads', { recursive: true });
+
+        // Download image
+        const imageResponse = await axios({
+            method: 'get',
+            url: imageUrl,
+            responseType: 'stream'
+        });
+        const imageWriter = fs.createWriteStream(imageDownloadPath);
+        imageResponse.data.pipe(imageWriter);
+        await new Promise((resolve, reject) => {
+            imageWriter.on('finish', resolve);
+            imageWriter.on('error', reject);
+        });
+
+        // Download audio
+        const audioResponse = await axios({
+            method: 'get',
+            url: audioUrl,
+            responseType: 'stream'
+        });
+        const audioWriter = fs.createWriteStream(audioDownloadPath);
+        audioResponse.data.pipe(audioWriter);
+        await new Promise((resolve, reject) => {
+            audioWriter.on('finish', resolve);
+            audioWriter.on('error', reject);
+        });
+
+        // Perform merge
+        await mergePictureAndAudio(imageDownloadPath, audioDownloadPath, outputPath);
+
+        // Optional: Clean up downloaded files
+        await Promise.all([
+            fsPromises.unlink(imageDownloadPath),
+            fsPromises.unlink(audioDownloadPath)
+        ]);
+
+        // Respond with success
+        res.json({ 
+            message: 'Merge successful', 
+            file: outputFileName 
+        });
+    } catch (error) {
+        console.error('Merge failed:', error);
+        res.status(500).json({ 
+            error: 'Merge failed', 
+            details: error.message 
+        });
+    }
+});
 
 app.post('/merge', async (req, res) => {
     const { videoUrl, audioUrl } = req.body;
