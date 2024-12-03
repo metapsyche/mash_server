@@ -272,3 +272,216 @@ https://firebasestorage.googleapis.com/v0/b/mash-8645e.appspot.com/o/Mike%20Bell
 
 
 
+
+Here are the separate JSON objects for each row from the table:
+
+```json
+{
+  "type": "Drawing",
+  "title": "Last Knight",
+  "file_name": "Last Knight",
+  "price": ".02ETH (~$53)",
+  "scarcity": "240 / 5,000",
+  "utility": "10% off tattoo",
+  "tags": ["skull", "medieval", "spooky", "lonely"],
+  "geo": "NYC",
+  "image_url": "https://mashlabsbucket.s3.us-east-1.amazonaws.com/Mike+Bellamy/1.Last+Knight.jpeg"
+}
+```
+
+```json
+{
+  "type": "Drawing",
+  "title": "Golden Buddah",
+  "file_name": "Golden Buddah",
+  "price": ".02ETH (~$53)",
+  "scarcity": "144 / 5,000",
+  "utility": "10% off tattoo",
+  "tags": ["baby", "Buddah", "peaceful", "spiritual"],
+  "geo": "NYC",
+  "image_url": "https://mashlabsbucket.s3.us-east-1.amazonaws.com/Mike+Bellamy/2.Golden+Buddah.jpeg"
+}
+```
+
+```json
+{
+  "type": "Painting",
+  "title": "Tragically Royal",
+  "file_name": "Tragically Royal",
+  "price": ".02ETH (~$53)",
+  "scarcity": "199 / 5,000",
+  "utility": "10% off tattoo",
+  "tags": ["skull", "dark", "medieval"],
+  "geo": "NYC",
+  "image_url": "https://mashlabsbucket.s3.us-east-1.amazonaws.com/Mike+Bellamy/3.Tragically+Royal.jpeg"
+}
+```
+
+```json
+{
+  "type": "Photography",
+  "title": "Shaman",
+  "file_name": "Shaman",
+  "price": ".02ETH (~$53)",
+  "scarcity": "527 / 5,000",
+  "utility": "10% off tattoo",
+  "tags": ["baby", "magic", "woods", "mysterious"],
+  "geo": "NYC",
+  "image_url": "https://mashlabsbucket.s3.us-east-1.amazonaws.com/Mike+Bellamy/4.Shaman.jpeg"
+}
+```
+
+```json
+{
+  "type": "Painting",
+  "title": "Behind The Mask",
+  "file_name": "Behind The Mask",
+  "price": ".02ETH (~$53)",
+  "scarcity": "741 / 5,000",
+  "utility": "10% off tattoo",
+  "tags": ["skull", "stilllife"],
+  "geo": "NYC",
+  "image_url": "https://mashlabsbucket.s3.us-east-1.amazonaws.com/Mike+Bellamy/5.Behind+The+Mask.jpeg"
+}
+```
+
+```json
+{
+  "type": "Painting",
+  "title": "Valhalla",
+  "file_name": "Valhalla",
+  "price": ".02ETH (~$53)",
+  "scarcity": "624 / 5,000",
+  "utility": "10% off tattoo",
+  "tags": ["skull", "viking", "strong"],
+  "geo": "NYC",
+  "image_url": "https://mashlabsbucket.s3.us-east-1.amazonaws.com/Mike+Bellamy/6.Valhalla.jpeg"
+}
+```
+
+```json
+{
+  "type": "Drawing",
+  "title": "Pray For LA",
+  "file_name": "Pray For LA",
+  "price": ".02ETH (~$53)",
+  "scarcity": "404 / 5,000",
+  "utility": "10% off tattoo",
+  "tags": ["LA", "hands", "neon", "urban"],
+  "geo": "NYC",
+  "image_url": "https://mashlabsbucket.s3.us-east-1.amazonaws.com/Mike+Bellamy/7.Pray+For+LA.jpeg"
+}
+```
+
+```json
+{
+  "type": "Photography",
+  "title": "Behind The Veil",
+  "file_name": "Behind The Veil",
+  "price": ".02ETH (~$53)",
+  "scarcity": "801 / 5,000",
+  "utility": "10% off tattoo",
+  "tags": ["spooky", "horror", "angry"],
+  "geo": "NYC",
+  "image_url": "https://mashlabsbucket.s3.us-east-1.amazonaws.com/Mike+Bellamy/8.Behind+The+Veil.jpeg"
+}
+```
+
+```json
+{
+  "type": "Painting",
+  "title": "Frozen In Time",
+  "file_name": "Frozen In Time",
+  "price": ".02ETH (~$53)",
+  "scarcity": "781 / 5,000",
+  "utility": "10% off tattoo",
+  "tags": ["animals", "bird", "skeleton"],
+  "geo": "NYC",
+  "image_url": "https://mashlabsbucket.s3.us-east-1.amazonaws.com/Mike+Bellamy/9.Frozen+In+Time.jpeg"
+}
+```
+
+```json
+{
+  "type": "Photography",
+  "title": "Faced",
+  "file_name": "Faced",
+  "price": ".02ETH (~$53)",
+  "scarcity": "681 / 5,000",
+  "utility": "10% off tattoo",
+  "tags": ["woman", "skeleton", "dancing", "spooky"],
+  "geo": "NYC",
+  "image_url": "https://mashlabsbucket.s3.us-east-1.amazonaws.com/Mike+Bellamy/10.Faced.jpeg"
+}
+```
+ 
+```json
+{
+  "type": "Drawing",
+  "title": "Dapper Don’t Matter",
+  "file_name": "Dapper Don’t Matter",
+  "price": ".02ETH (~$53)",
+  "scarcity": "372 / 5,000",
+  "utility": "10% off tattoo",
+  "tags": ["skeleton", "dapper", "fun"],
+  "geo": "NYC",
+  "image_url": "https://mashlabsbucket.s3.us-east-1.amazonaws.com/Mike+Bellamy/11.Dapper+Don%E2%80%99t+Matter.jpeg"
+}
+```
+
+```json
+{
+  "type": "Drawing",
+  "title": "Dragonsuit",
+  "file_name": "Dragonsuit",
+  "price": ".02ETH (~$53)",
+  "scarcity": "521 / 5,000",
+  "utility": "10% off tattoo",
+  "tags": ["dragon", "tattoo", "energetic"],
+  "geo": "NYC",
+  "image_url": "https://mashlabsbucket.s3.us-east-1.amazonaws.com/Mike+Bellamy/12.Dragonsuit.jpeg"
+}
+```
+
+```json
+{
+  "type": "Photography",
+  "title": "Voyager",
+  "file_name": "Voyager",
+  "price": ".02ETH (~$53)",
+  "scarcity": "894 / 5,000",
+  "utility": "10% off tattoo",
+  "tags": ["baby", "space", "ambient"],
+  "geo": "NYC",
+  "image_url": "https://mashlabsbucket.s3.us-east-1.amazonaws.com/Mike+Bellamy/13.Voyager.jpeg"
+}
+```
+
+```json
+{
+  "type": "Drawing",
+  "title": "Roosternoose",
+  "file_name": "Roosternoose",
+  "price": ".02ETH (~$53)",
+  "scarcity": "174 / 5,000",
+  "utility": "10% off tattoo",
+  "tags": ["animals", "rooster", "country"],
+  "geo": "NYC",
+  "image_url": "https://mashlabsbucket.s3.us-east-1.amazonaws.com/Mike+Bellamy/14.Roosternoose.jpeg"
+}
+```
+
+```json
+{
+  "type": "Drawing",
+  "title": "Samurai Skull",
+  "file_name": "Samurai Skull",
+  "price": ".02ETH (~$53)",
+  "scarcity": "104 / 5,000",
+  "utility": "10% off tattoo",
+  "tags": ["skull", "martial arts", "mad", "aggressive"],
+  "geo": "NYC",
+  "image_url": "https://mashlabsbucket.s3.us-east-1.amazonaws.com/Mike+Bellamy/15.Samurai+Skull.jpeg"
+}
+```
+ 

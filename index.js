@@ -4,8 +4,54 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const pool = require('./db'); // Make sure the path to db.js is correct
-const cors = require('cors'); // Import the cors middleware
+const cors = require('cors');  
+const fs = require('fs');
+const axios = require('axios'); // For downloading files
 const ffmpeg = require('fluent-ffmpeg');
+const fsPromises = require('fs').promises;
+const path = require('path');
+
+// Import paths for FFmpeg and FFprobe
+const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
+const ffprobePath = require('@ffprobe-installer/ffprobe').path;
+ 
+ffmpeg.setFfmpegPath(ffmpegPath);
+ffmpeg.setFfprobePath(ffprobePath);
+ 
+ 
+const mergeVideoAndAudio = async (videoPath, audioPath, outputPath) => {
+    try {
+        // Get video duration using ffprobe
+        const getVideoDuration = () =>
+            new Promise((resolve, reject) => {
+                ffmpeg.ffprobe(videoPath, (err, metadata) => {
+                    if (err) reject(err);
+                    else resolve(metadata.format.duration);
+                });
+            });
+
+        const videoDuration = await getVideoDuration();
+
+        await new Promise((resolve, reject) => {
+            ffmpeg()
+                .input(videoPath)
+                .videoCodec('copy') // Copy video codec (no re-encoding)
+                .input(audioPath)
+                .audioCodec('aac') // Encode audio to AAC format
+                .outputOptions('-map 0:v:0') // Map video stream
+                .outputOptions('-map 1:a:0') // Map audio stream
+                .outputOptions(`-t ${videoDuration}`) // Trim audio to match video duration
+                .outputOptions('-shortest') // Ensure output matches the shortest stream
+                .on('end', resolve)
+                .on('error', reject)
+                .save(outputPath);
+        });
+
+        console.log(`Merge complete: ${outputPath}`);
+    } catch (error) {
+        console.error('Error during merge:', error);
+    }
+};
 
 const app = express();
 const port = 3000;
@@ -50,61 +96,33 @@ app.get('/', (req, res) => {
 });
 
 
-app.post('/mash-video-audio', async (req, res) => {
-  const { videoUrl, audioUrl } = req.body;
 
-  if (!videoUrl || !audioUrl) {
-    return res.status(400).json({ error: 'Both videoUrl and audioUrl are required' });
-  }
+app.post('/merge', async (req, res) => {
+    const { videoUrl, audioUrl } = req.body;
 
-  const videoPath = `temp/${Date.now()}_video.mp4`;
-  const audioPath = `temp/${Date.now()}_audio.mp3`;
-  const outputPath = `outputs/${Date.now()}_merged.mp4`;
-
-  try {
-    // Ensure directories exist
-    if (!fs.existsSync('temp')) {
-      fs.mkdirSync('temp');
-    }
-    if (!fs.existsSync('outputs')) {
-      fs.mkdirSync('outputs');
+    if (!videoUrl || !audioUrl) {
+        return res.status(400).json({ error: 'Both video and audio URLs are required' });
     }
 
-    // Download the video and audio files
-    await downloadFile(videoUrl, videoPath);
-    await downloadFile(audioUrl, audioPath);
+    const outputFileName = `${Date.now()}_output.mp4`;
+    const outputPath = path.join('outputs', outputFileName);
 
-    // Merge video and audio using FFmpeg
-    ffmpeg()
-      .input(videoPath)
-      .input(audioPath)
-      .output(outputPath)
-      .on('end', () => {
-        // Cleanup temporary files
-        fs.unlinkSync(videoPath);
-        fs.unlinkSync(audioPath);
+    try {
+        // Ensure output directory exists
+        await fsPromises.mkdir('outputs', { recursive: true });
 
-        // Send the resulting file to the client
-        res.download(outputPath, 'merged-video.mp4', (err) => {
-          if (err) {
-            console.error(err);
-            res.status(500).json({ error: 'File download failed' });
-          }
+        // Perform merge
+        await mergeVideoAndAudio(videoUrl, audioUrl, outputPath);
 
-          // Cleanup the output file after download
-          fs.unlinkSync(outputPath);
-        });
-      })
-      .on('error', (err) => {
-        console.error('Error merging video and audio:', err);
-        res.status(500).json({ error: 'Failed to merge video and audio' });
-      })
-      .run();
-  } catch (err) {
-    console.error('Error processing request:', err);
-    res.status(500).json({ error: err.message });
-  }
+        // Respond with success
+        res.json({ message: 'Merge successful', file: outputFileName });
+    } catch (error) {
+        res.status(500).json({ error: 'Merge failed', details: error.message });
+    }
 });
+
+ 
+
 
 
 // Create a new artist with profile information
@@ -176,9 +194,6 @@ app.delete('/artists/:id', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
-
-// Update an artist's profile picture and/or banner picture by ID
 app.put('/artists/:id/pictures', async (req, res) => {
   const { id } = req.params;
   const { profilePicture, bannerPicture } = req.body;
@@ -190,21 +205,48 @@ app.put('/artists/:id/pictures', async (req, res) => {
       return res.status(404).json({ error: 'Artist not found' });
     }
 
-    // Update profile picture and/or banner picture
-    const result = await pool.query(
-      `UPDATE artists 
-       SET profilePicture = COALESCE($1, profilePicture), 
-           bannerPicture = COALESCE($2, bannerPicture)
-       WHERE id = $3 
-       RETURNING *`,
-      [profilePicture, bannerPicture, id]
-    );
+    // Prepare the update fields, only include non-undefined values
+    const updateFields = {};
+    const values = [];
+
+    if (profilePicture !== undefined) {
+      updateFields.profilePicture = profilePicture;
+      values.push(profilePicture);
+    }
+
+    if (bannerPicture !== undefined) {
+      updateFields.bannerPicture = bannerPicture;
+      values.push(bannerPicture);
+    }
+
+    // If no fields to update, return an error
+    if (values.length === 0) {
+      return res.status(400).json({ error: 'At least one picture must be provided' });
+    }
+
+    // Add the artist ID to the values array
+    values.push(id);
+
+    // Build the SQL query dynamically based on the fields to update
+    let query = 'UPDATE artists SET ';
+    const setClauses = [];
+    if (updateFields.profilePicture) {
+      setClauses.push('profilePicture = $' + (setClauses.length + 1));
+    }
+    if (updateFields.bannerPicture) {
+      setClauses.push('bannerPicture = $' + (setClauses.length + 1));
+    }
+    query += setClauses.join(', ') + ' WHERE id = $' + (setClauses.length + 1) + ' RETURNING *';
+
+    // Execute the query
+    const result = await pool.query(query, values);
 
     res.status(200).json(result.rows[0]);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
 
 
 
