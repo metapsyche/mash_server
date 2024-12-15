@@ -187,8 +187,7 @@ app.use(cors({
 
 app.use(bodyParser.json());
 
-
-// const pool = require('./db'); // Ensure the correct path
+ 
 
 pool.on('error', (err) => {
   console.error('Unexpected error on idle client', err);
