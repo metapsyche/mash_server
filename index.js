@@ -231,9 +231,9 @@ app.post('/mergevideo', async (req, res) => {
     const outputFileName = `${Date.now()}_output.mp4`;
 
     // Define the S3 upload key
-    const key = `mashed/${outputFileName}`;
+    // const key = `mashed/${outputFileName}`;
  
-    await mergeAndUploadToS3(videoUrl, audioUrl, key);
+    const { key }= await mergeAndUploadToS3(videoUrl, audioUrl);
  
     const publicUrl = await getVideoUrl(bucketName, key);
 
