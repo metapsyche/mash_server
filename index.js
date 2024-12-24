@@ -85,25 +85,39 @@ const mergePictureAndAudio = async (imagePath, audioPath, outputPath) => {
         throw error;
     }
 };
-// Function to merge and upload to S3
-const mergeAndUploadVideoToS3 = async (videoUrl, audioUrl) => {
-  try {
-    const outputFileName = `${Date.now()}_output.mp4`;
-    const outputPath = path.join('outputs', outputFileName);
 
-    // Ensure the outputs directory exists
-    await fsPromises.mkdir('outputs', { recursive: true });
+const mergeAndUploadVideoToS3 = async (videoUrl, audioUrl) => {
+  const outputFileName = `${Date.now()}_video_audio_output.mp4`;
+  const outputPath = path.join('outputs', outputFileName);
+  const downloadsDir = 'downloads';
+  const outputsDir = 'outputs';
+
+  // Create necessary directories
+  await fsPromises.mkdir(downloadsDir, { recursive: true });
+  await fsPromises.mkdir(outputsDir, { recursive: true });
+
+  const videoDownloadPath = path.join(downloadsDir, `${Date.now()}_video${path.extname(videoUrl)}`);
+  const audioDownloadPath = path.join(downloadsDir, `${Date.now()}_audio${path.extname(audioUrl)}`);
+
+  try {
+    // Download video and audio
+    await downloadFile(videoUrl, videoDownloadPath);
+    await downloadFile(audioUrl, audioDownloadPath);
 
     // Merge video and audio
-    await mergeVideoAndAudio(videoUrl, audioUrl, outputPath);
+    await mergeVideoAndAudio(videoDownloadPath, audioDownloadPath, outputPath);
 
     // Upload to S3
     const key = `mashed/${outputFileName}`;
     const fileBuffer = await fsPromises.readFile(outputPath);
     await uploadVideo(bucketName, key, fileBuffer);
 
-    // Clean up the local file
-    await fsPromises.unlink(outputPath);
+    // Clean up local files
+    await Promise.all([
+      fsPromises.unlink(videoDownloadPath),
+      fsPromises.unlink(audioDownloadPath),
+      fsPromises.unlink(outputPath),
+    ]);
 
     console.log(`Uploaded to S3: ${key}`);
     return { key };
@@ -112,6 +126,7 @@ const mergeAndUploadVideoToS3 = async (videoUrl, audioUrl) => {
     throw error;
   }
 };
+
 
 
 // Function to download files from URLs
