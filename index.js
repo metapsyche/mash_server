@@ -86,7 +86,7 @@ const mergePictureAndAudio = async (imagePath, audioPath, outputPath) => {
     }
 };
 // Function to merge and upload to S3
-const mergeAndUploadToS3 = async (videoUrl, audioUrl) => {
+const mergeAndUploadVideoToS3 = async (videoUrl, audioUrl) => {
   try {
     const outputFileName = `${Date.now()}_output.mp4`;
     const outputPath = path.join('outputs', outputFileName);
@@ -233,7 +233,7 @@ app.post('/mergevideo', async (req, res) => {
     // Define the S3 upload key
     // const key = `mashed/${outputFileName}`;
  
-    const { key }= await mergeAndUploadToS3(videoUrl, audioUrl);
+    const { key }= await mergeAndUploadVideoToS3(videoUrl, audioUrl);
  
     // const publicUrl = await getVideoUrl(bucketName, key);
     const publicUrl = `https://${bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
