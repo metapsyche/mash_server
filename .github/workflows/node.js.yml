@@ -71,7 +71,7 @@ jobs:
 
     - name: Check and Manage mash_server
       run: |
-        if pm2 list | grep -q "mash_server"; then
+        if pm2 describe mash_server > /dev/null; then
           echo "mash_server is running. Restarting..."
           pm2 restart mash_server --update-env
         else
