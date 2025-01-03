@@ -73,7 +73,7 @@ jobs:
       run: |
         if pm2 list | grep -q "mash_server"; then
           echo "mash_server is running. Restarting..."
-          pm2 restart mash_server
+          pm2 restart mash_server --update-env
         else
           echo "mash_server is not running. Starting it..."
           pm2 start /home/ubuntu/actions-runner/_work/mash_server/mash_server/index.js --name "mash_server"
