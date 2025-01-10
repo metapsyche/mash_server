@@ -39,13 +39,14 @@ const mergeVideoAndAudio = async (videoPath, audioPath, outputPath) => {
         await new Promise((resolve, reject) => {
             ffmpeg()
                 .input(videoPath)
-                .videoCodec('copy') // Copy video codec (no re-encoding)
+                .videoCodec('copy')
+                .outputOptions('-an') // Remove original audio from video
                 .input(audioPath)
-                .audioCodec('aac') // Encode audio to AAC format
-                .outputOptions('-map 0:v:0') // Map video stream
-                .outputOptions('-map 1:a:0') // Map audio stream
-                .outputOptions(`-t ${videoDuration}`) // Trim audio to match video duration
-                .outputOptions('-shortest') // Ensure output matches the shortest stream
+                .audioCodec('aac')  
+                .outputOptions('-map 0:v:0')  
+                .outputOptions('-map 1:a:0') 
+                .outputOptions(`-t ${videoDuration}`) 
+                .outputOptions('-shortest')  
                 .on('end', resolve)
                 .on('error', reject)
                 .save(outputPath);
@@ -241,13 +242,8 @@ app.post('/mergevideo', async (req, res) => {
     return res.status(400).json({ error: 'Both video and audio URLs are required' });
   }
 
-  try {
-    // Generate unique output filename
-    // const outputFileName = `${Date.now()}_output.mp4`;
+  try { 
 
-    // Define the S3 upload key
-    // const key = `mashed/${outputFileName}`;
- 
     const { key }= await mergeAndUploadVideoToS3(videoUrl, audioUrl);
  
     // const publicUrl = await getVideoUrl(bucketName, key);
